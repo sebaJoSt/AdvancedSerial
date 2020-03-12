@@ -4,41 +4,43 @@
 //Instantiate a new advanced serial object
 AdvancedSerial AdvSerial(&Serial, 500);
 
+unsigned long lastupdate = 0;
+unsigned long lastSquareTransition = 0;
+
 //signals
 float sine_value = 0;
 float cosine_value = 0;
 float square_value = -5;
 
-void setup(){
-    //Initialize Serial port
-    Serial.begin(9600);
+void setup() {
+  //Initialize Serial port
+  Serial.begin(9600);
 
-    //Add signals to Advanced Serial which will be transmitted
-    AdvSerial.addSignal("sine",&sine_value);
-    AdvSerial.addSignal("cosine",&cosine_value);
-    AdvSerial.addSignal("square",&square_value);
-}
-unsigned long lastupdate = 0;
-unsigned long lastSquareTransition = 0;
-
-void loop(){
-  //Update the calculated cosine and sine values;
-  sine_value = 2.0 * sin( 0.5*3.1415*((double)(millis()))/1000);
-  cosine_value = cos( 0.25*3.1415*((double)(millis()))/1000);
-
-  if((millis() - lastSquareTransition) > 1000){
-      lastSquareTransition = millis();
-      square_value = -1*square_value;
-  }
-  
-  //Print an ascii string once per second.
-  if((millis() - lastupdate) > 1000){
-      lastupdate = millis();
-      Serial.print("Advanced Serial Test.  Current MS:");
-      Serial.println(lastupdate);
-  }
-
-  //Execute the advanced serial code
-  AdvSerial.exec();
+  //Add signals to Advanced Serial which will be transmitted
+  AdvSerial.addSignal("sine", &sine_value);
+  AdvSerial.addSignal("cosine", &cosine_value);
+  AdvSerial.addSignal("square", &square_value);
 }
 
+void loop() {
+
+  AdvSerial.Read();
+
+  if ((millis() - lastSquareTransition) > 5000) {
+    //Update the calculated square value;
+    square_value = -1 * square_value;
+
+    lastSquareTransition = millis();
+  }
+
+  if ((millis() - lastupdate) > 1000) {
+    //Update the calculated cosine and sine values;
+    sine_value = 5.0 * sin( 0.5 * 3.1415 * ((double)(millis())) / 10);
+    cosine_value = 5.0 * cos( 0.5 * 3.1415 * ((double)(millis())) / 10);
+    
+    lastupdate = millis();
+
+    AdvSerial.TransmitData(123, true);
+  }
+
+}

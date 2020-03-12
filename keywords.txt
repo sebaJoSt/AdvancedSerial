@@ -1,0 +1,34 @@
+#######################################
+# Syntax Coloring Map For AdvancedSerial
+#######################################
+
+#######################################
+# Methods and Functions AdvancedSerial (KEYWORD2)
+#######################################
+
+maxSignalCount	KEYWORD2
+signalCount	KEYWORD2
+
+
+setCommandCallback	KEYWORD2
+setInitialIntervalSettings	KEYWORD2
+addSignal	KEYWORD2
+deleteSignals	KEYWORD2
+WireReset	KEYWORD2
+Read	KEYWORD2
+exec	KEYWORD2
+TransmitSymbols	KEYWORD2
+TransmitData	KEYWORD2
+WireTransmitSingleSymbol	KEYWORD2
+WireTransmitSingleDataPoint	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+AdvancedSerial	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

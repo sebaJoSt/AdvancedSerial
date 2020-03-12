@@ -25,7 +25,7 @@ void setup() {
   ASerial.addSignal("cos-double",&cosValue);
   ASerial.addSignal("square-bool",&squarewv);
   ASerial.addSignal("Analog0-float",&A0_data);
-  ASerial.TransmitSignalList(123);
+  ASerial.TransmitSymbols(123,true);
 }
 
 
@@ -58,6 +58,6 @@ void loop() {
 
   if((curtime-writems)>100){
       writems = curtime;
-      ASerial.TransmitSignalData(123);
+      ASerial.TransmitData(123,true);
   }
 }
