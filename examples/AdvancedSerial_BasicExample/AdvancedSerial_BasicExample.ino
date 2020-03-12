@@ -2,7 +2,7 @@
 #include "AdvancedSerial.h"
 
 //Instantiate a new advanced serial object
-AdvancedSerial AdvSerial(&Serial, 500);
+AdvancedSerial AdvSerial;
 
 unsigned long lastupdate = 0;
 unsigned long lastSquareTransition = 0;
@@ -15,7 +15,7 @@ float square_value = -5;
 void setup() {
   //Initialize Serial port
   Serial.begin(9600);
-
+  AdvSerial.begin(&Serial, 100);
   //Add signals to Advanced Serial which will be transmitted
   AdvSerial.addSignal("sine", &sine_value);
   AdvSerial.addSignal("cosine", &cosine_value);
