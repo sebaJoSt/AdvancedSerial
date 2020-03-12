@@ -1,11 +1,7 @@
 /*
         File: AdvancedSerial.h
-        Author: Nick Dodds <Nick1787@gmail.com>
+        Author: Sebastian Strobl <sebastian.strobl@gmx.de>
         Description: An Advanced Serial Interface for Interfacing with Arduino
-        Modified by: Sebastian Strobl <sebastian.strobl@gmx.de>
-        Changelog:
-        2V0 - 2020-02-14 Big rewrite with new Read functions
-        1V1 - 2019-01-22 Changed EOL from <CRNL> to ENDOFASI<CRNL> to make protocol more robust
 */
 
 
@@ -15,13 +11,25 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-//MESAGE DECODER
+//COMMAND DECODER
 //
-//  All Messages are composed of the following structure
-//    |--Header------------|-DATA--------------------|-EOT--|
+//  -INCOMING COMMANDS----------------------------------------------------
+//   Command:         <COMMAND,PARAMETER_01,PARAMETER_02,...,PARAMETER_10>
+//   StringCommand:   <COMMAND, STRING_01  ,PARAMETER_02,...,PARAMETER_10>
+//                    <---------max. 64 chars---------------------------->
+//   COMMAND:             String, Upper case w/o spaces, e.g. MIPIWRITE
+//   PARAMETER:           Int 16 Bit, max 10 parameters
+//   STRING_01:           max. 15 chars
+//
+//  -OUTGOING COMMANDS-----------------------------------------------------
+//    |--Header------------|-DATA--------------------|-EOT---------|
 //    #ASI:<MSGKEY>:<MSGID>:..........................ENDOFASI<CRNL>
+
+//    MSGKEY:   DATA#:    DATA:                           DESCRIPTION:
+//     B0       N         <SymbolID><SymbolName><DTYPE>   Up to N Items. Response to request for available symbols.
+//     B1       N         <SymbolID><DATA>                Up to N Items. Response to request for Data.
 //
-//    DATA:           TYPE:            DESCRIPTION:
+//                    TYPE:            DESCRIPTION:
 //    <MSGKEY>        byte             Message KEY, A unique key for the type of message being sent
 //    <MSGID>         uint32/ulong     Message ID,  A unique message ID is which is echo's back to transmitter to indicate a response to a message (0 to 4294967295)
 //    <DATA>          (varying)        Message Data, varying data types and length depending on message
@@ -29,18 +37,6 @@
 //    <SymbolID>      uint             Symbol ID number
 //    <SymbolName>    String0          Symbol Name - Null Terminated String
 //    <DTYPE>         byte             DataType  0=Boolean, 1=Byte, 2=short, 3=int, 4=unsigned int, 5=long, 6=unsigned long, 7=float, 8=double
-//
-//
-//  -INCOMING-MESSAGES-
-//    MSGKEY:   DATA#:    DATA:                           DESCRIPTION:
-//     UPDATEEE A0                            Request for available Symbols and Types
-//     UPDATEEE A1                            Request for Data as a single message (all symbols).
-//
-//  -OUTGOING-MESSAGES-
-//    MSGKEY:   DATA#:    DATA:                           DESCRIPTION:
-//     B0       N         <SymbolID><SymbolName><DTYPE>   Up to N Items. Response to request for available symbols.
-//     B1       N         <SymbolID><DATA>                Up to N Items. Response to request for Data.
-//
 
 
 
@@ -104,20 +100,12 @@ class AdvancedSerial {
     void addSignal(String Name, int * value);
     void deleteSignals();
     void Read();
-    
     void TransmitSymbols(unsigned long MessageID, bool send_eol);
     void TransmitData(unsigned long MessageID, bool send_eol);
-    void TransmitDataInterval(unsigned long MessageID, bool send_eol);
-
-    void WireTransmitSymbols(unsigned long MessageID, bool send_eol);
+	void WireTransmitSymbols(unsigned long MessageID, bool send_eol);
     void WireTransmitData(unsigned long MessageID, bool send_eol);
-
-    void WireSlaveTransmitToMaster();
-    void WireSlaveReceive();
-
-    void WireSlaveTransmitSingleSymbol();
-    void WireSlaveTransmitSingleDataPoint();
-
+	void TransmitDataInterval(unsigned long MessageID, bool send_eol);
+    
   private:
     static AdvancedSerial* pSingletonInstance;
 
@@ -131,10 +119,14 @@ class AdvancedSerial {
         pSingletonInstance->WireSlaveReceive();
     }
 	
-
+    void WireSlaveTransmitToMaster();
+    void WireSlaveReceive();
+    void WireSlaveTransmitSingleSymbol();
+    void WireSlaveTransmitSingleDataPoint();
     void (*_readCallback)(char * command, int * parameter, char * string01);
     bool recvWithStartEndMarkers();
     void parseData();
+	
 
     union {
       bool val;

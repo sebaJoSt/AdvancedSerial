@@ -1,8 +1,7 @@
 /*
         File: AdvancedSerial.cpp
-        Author: Nick Dodds <Nick1787@gmail.com>
+        Author: Sebastian Strobl <sebastian.strobl@gmx.de>
         Description: An Advanced Serial Interface for Interfacing with Arduino
-        Modified by: Sebastian Strobl <sebastian.strobl@gmx.de>
 */
 
 #include "AdvancedSerial.h"
