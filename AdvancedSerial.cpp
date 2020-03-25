@@ -153,7 +153,9 @@ void AdvancedSerial::Read() {
 
     }  else if (strcmp(COMMAND, "LOGGING_ACTIVATE") == 0)
     {
-      loggingInterval_ms = PARAMETER[0] * 1000;
+      unsigned long parameter = 0;
+      parameter = PARAMETER[0];
+      loggingInterval_ms = parameter * 1000;
       loggingActivated = true;
       loggingFirstTime = true;
       loggingLastTimeDone = 0;
@@ -509,7 +511,6 @@ void AdvancedSerial::WireTransmitData(unsigned long msg_id, bool send_eol) {
 }
 
 void AdvancedSerial::TransmitDataInterval(unsigned long msg_id, bool send_eol) {
-  
   unsigned long millisNow = millis();	
   unsigned long loggingIntervalActual_ms = (millisNow - loggingLastTimeDone);
   
