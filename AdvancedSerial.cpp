@@ -154,9 +154,9 @@ void AdvancedSerial::Read() {
     }  else if (strcmp(COMMAND, "LOGGING_ACTIVATE") == 0)
     {
       unsigned long parameter = PARAMETER[0];
-	  if (parameter > 32767) parameter = 32767;
-	  unsigned long unit_multiplicator = 1000;
-	  unsigned long loggingInterval_ms = parameter * unit_multiplicator;
+      if (parameter > 32767) parameter = 32767;
+      unsigned long unit_multiplicator = 1000;
+      unsigned long loggingInterval_ms = parameter * unit_multiplicator;
 
       setInitialIntervalSettings(true, loggingInterval_ms);
 
