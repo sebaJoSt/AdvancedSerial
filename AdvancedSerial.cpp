@@ -242,17 +242,22 @@ void AdvancedSerial::setInitialIntervalSettings(bool loggingActivated, unsigned 
 
   if (LoggingActivated)
   {
-	if (loggingInterval_ms == 0)
-	{
-    LoggingTimeSet_ms = 100;
-    LoggingInterval_ms = 100;
-	}
-	else 
-	{
-    LoggingTimeSet_ms = loggingInterval_ms;
-    LoggingInterval_ms = loggingInterval_ms;
+    if (loggingInterval_ms == 0)
+    {
+      LoggingTimeSet_ms = 100;
+      LoggingInterval_ms = 100;
     }
-	LoggingFirstTime = true;
+    else if (loggingInterval_ms > 32767000)
+    {
+      LoggingTimeSet_ms = 32767000;
+      LoggingInterval_ms = 32767000;
+    }
+    else
+    {
+      LoggingTimeSet_ms = loggingInterval_ms;
+      LoggingInterval_ms = loggingInterval_ms;
+    }
+    LoggingFirstTime = true;
   }
 }
 
@@ -530,7 +535,6 @@ void AdvancedSerial::TransmitDataInterval(unsigned long msg_id, bool send_eol) {
   unsigned long loggingElapsedTime_ms = (millis() - LoggingFirstTimeDone_ms);
 
   if (((loggingElapsedTime_ms >= LoggingTimeSet_ms) || LoggingFirstTime == true) && LoggingActivated == true) {
-
     if (LoggingFirstTime == false) LoggingTimeSet_ms += LoggingInterval_ms;
     LoggingFirstTime = false;
 
