@@ -49,7 +49,7 @@ struct LoggedSignal {
 
 class AdvancedSerial {
 
-  //variables
+    //variables
   public:
   private:
     unsigned int maxSignalCount;
@@ -67,10 +67,11 @@ class AdvancedSerial {
     const int numChars = 64;
     char receivedChars[64];
 
-    bool loggingActivated = true;
-    bool loggingFirstTime = true;
-    unsigned long loggingLastTimeDone = 0;
-    unsigned long loggingInterval_ms = 1000;
+    bool LoggingActivated = true;
+    bool LoggingFirstTime = true;
+    unsigned long LoggingFirstTimeDone_ms = 0;
+    unsigned long LoggingTimeSet_ms = 0;
+    unsigned long LoggingInterval_ms = 1000;
     byte LOGGING_MODE = 0;
     byte SLAVE_ID;
     bool SLAVE_FOUND[128];
@@ -82,7 +83,7 @@ class AdvancedSerial {
     //e.g. Pins 20 (SDA) and 21 (SCL) on Arduino Mega
 
 
-  //functions
+    //functions
   public:
     AdvancedSerial();
     ~AdvancedSerial();
@@ -93,7 +94,7 @@ class AdvancedSerial {
     void setCommandCallback(void (*readCallback)(char * command, int * parameter, char * string_01));
     void setInitialIntervalSettings(bool loggingactivated, unsigned long logginginterval_ms);
     void addSignal(String Name, bool * value);
-	void addSignal(String Name, byte * value);
+    void addSignal(String Name, byte * value);
     void addSignal(String Name, float * value);
     void addSignal(String Name, double * value);
     void addSignal(String Name, unsigned long * value);
@@ -102,10 +103,10 @@ class AdvancedSerial {
     void Read();
     void TransmitSymbols(unsigned long MessageID, bool send_eol);
     void TransmitData(unsigned long MessageID, bool send_eol);
-	void WireTransmitSymbols(unsigned long MessageID, bool send_eol);
+    void WireTransmitSymbols(unsigned long MessageID, bool send_eol);
     void WireTransmitData(unsigned long MessageID, bool send_eol);
-	void TransmitDataInterval(unsigned long MessageID, bool send_eol);
-    
+    void TransmitDataInterval(unsigned long MessageID, bool send_eol);
+
   private:
     static AdvancedSerial* pSingletonInstance;
 
@@ -118,7 +119,7 @@ class AdvancedSerial {
       if (pSingletonInstance)
         pSingletonInstance->WireSlaveReceive();
     }
-	
+
     void WireSlaveTransmitToMaster();
     void WireSlaveReceive();
     void WireSlaveTransmitSingleSymbol();
@@ -126,13 +127,13 @@ class AdvancedSerial {
     void (*_readCallback)(char * command, int * parameter, char * string01);
     bool recvWithStartEndMarkers();
     void parseData();
-	
+
 
     union {
       bool val;
       byte bval[1];
     } boolCvt;
-	
+
     union {
       short val;
       byte bval[2];

@@ -121,7 +121,7 @@ void AdvancedSerial::addSignal(String Name, byte * value) {
 
 
 void AdvancedSerial::Read() {
-	
+
   if (recvWithStartEndMarkers() == true) {
     parseData();
     Serial.print(F("<"));
@@ -154,15 +154,13 @@ void AdvancedSerial::Read() {
     }  else if (strcmp(COMMAND, "LOGGING_ACTIVATE") == 0)
     {
       unsigned long parameter = 0;
-      parameter = PARAMETER[0];
-      loggingInterval_ms = parameter * 1000;
-      loggingActivated = true;
-      loggingFirstTime = true;
-      loggingLastTimeDone = 0;
+      parameter = PARAMETER[0] * 1000;
+
+      setInitialIntervalSettings(true, parameter);
 
     }  else if (strcmp(COMMAND, "LOGGING_DEACTIVATE") == 0)
     {
-      loggingActivated = false;
+      setInitialIntervalSettings(false, LoggingInterval_ms);
     }
 
     _readCallback(COMMAND, PARAMETER, STRING_01);
@@ -176,7 +174,7 @@ bool AdvancedSerial::recvWithStartEndMarkers() {
   char startMarker = '<';
   char endMarker = '>';
   char rc;
-  
+
   while (SerialRef->available() > 0 && newData == false) {
     rc = SerialRef->read();
     if (recvInProgress == true) {
@@ -237,9 +235,23 @@ void AdvancedSerial::parseData() {      // split the data into its parts
   PARAMETER[9] = atoi(strtokIndx);
 }
 
-void AdvancedSerial::setInitialIntervalSettings(bool loggingactivated, unsigned long logginginterval_ms) {
-  loggingActivated = loggingactivated;
-  loggingInterval_ms = logginginterval_ms;
+void AdvancedSerial::setInitialIntervalSettings(bool loggingActivated, unsigned long loggingInterval_ms) {
+  LoggingActivated = loggingActivated;
+
+  if (LoggingActivated)
+  {
+	if (loggingInterval_ms == 0)
+	{
+    LoggingTimeSet_ms = 100;
+    LoggingInterval_ms = 100;
+	}
+	else 
+	{
+    LoggingTimeSet_ms = loggingInterval_ms;
+    LoggingInterval_ms = loggingInterval_ms;
+    }
+	LoggingFirstTime = true;
+  }
 }
 
 void AdvancedSerial::TransmitSymbols(unsigned long msg_id, bool send_eol) {
@@ -317,7 +329,7 @@ void AdvancedSerial::TransmitData(unsigned long msg_id, bool send_eol) {
 
   int bytecount = 22 + signalCount * 2;
   for (int i = 0; i < signalCount; i++) {
-	intCvt.val = i;
+    intCvt.val = i;
     SerialRef->write(intCvt.bval, 2);
     LoggedSignal sym = Signals[i];
     switch (sym.Type) {
@@ -386,7 +398,7 @@ void AdvancedSerial::WireTransmitSymbols(unsigned long msg_id, bool send_eol) {
 
   for (int slaveindex = 0; slaveindex <= 127; slaveindex++) { //Cycle through slaves
     byte transmissionIsSuccess = false;
- 
+
     for (byte retries = 0; retries < 4; retries++) {
       Wire.beginTransmission(slaveindex);
       Wire.write(0);
@@ -402,7 +414,7 @@ void AdvancedSerial::WireTransmitSymbols(unsigned long msg_id, bool send_eol) {
       for (int i = 0; i < 1000; i++) {
         byte receivedBytes = Wire.requestFrom(slaveindex, 32);    // request 32 bytes from slave device
         if (receivedBytes < 2) continue; //try again
-        
+
         bool eosignal_found = false;
         if (i == 0) {
           //Expecting response 0xAA from slave -> Slave found
@@ -511,19 +523,23 @@ void AdvancedSerial::WireTransmitData(unsigned long msg_id, bool send_eol) {
 }
 
 void AdvancedSerial::TransmitDataInterval(unsigned long msg_id, bool send_eol) {
-  unsigned long millisNow = millis();	
-  unsigned long loggingIntervalActual_ms = (millisNow - loggingLastTimeDone);
-  
-  if (((loggingIntervalActual_ms >= loggingInterval_ms) || loggingFirstTime == true) && loggingActivated == true) {
-	loggingLastTimeDone = millisNow;
-	loggingFirstTime = false;   
-	
-    if (LOGGING_MODE == 0 || LOGGING_MODE == 2) {
+
+  if (LoggingFirstTime == true) LoggingFirstTimeDone_ms = millis();
+  unsigned long loggingElapsedTime_ms = (millis() - LoggingFirstTimeDone_ms);
+
+  if (((loggingElapsedTime_ms >= LoggingTimeSet_ms) || LoggingFirstTime == true) && LoggingActivated == true) {
+
+    if (LoggingFirstTime == false) LoggingTimeSet_ms += LoggingInterval_ms;
+    LoggingFirstTime = false;
+
+    if (LOGGING_MODE == 0 || LOGGING_MODE == 2)
+    {
       this->TransmitData(msg_id, true);
-    } else if (LOGGING_MODE == 1) {
+    }
+    else if (LOGGING_MODE == 1)
+    {
       this->WireTransmitData(msg_id, true);
     }
-
   }
 }
 
